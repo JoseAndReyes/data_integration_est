@@ -89,12 +89,15 @@ library(survey)
 #' @export
 # Cargar librerías necesarias
 
+
+library(survey)
+
 library(dplyr)
 
-RegDI <- function(data, y_A_col, y_B_col, 
-                 size_a, size_muestra_B, N = NULL, 
-                 apply_correction = 0, aux_vars = NULL,
-                 weights_A_col = NULL) {
+RegDI2 <- function(data, y_A_col, y_B_col, 
+                   size_a, size_muestra_B, N = NULL, 
+                   apply_correction = 0, aux_vars = NULL,
+                   weights_A_col = NULL) {
   
   # Determinar N si no se proporciona
   if (is.null(N)) {
@@ -198,13 +201,11 @@ RegDI <- function(data, y_A_col, y_B_col,
     aggregate.stage = 1  # Agregar aggregate.stage para prevenir el warning
   )
   
+  # Aplicar corrección según corresponda
   if (apply_correction == 1) {
-    T_RegDI <- as.numeric(
-      svymean(as.formula(paste("~", y_A_col)), calibrated_design)[1]
-    )  
-    V_RegDI <- as.numeric(
-      svyvar(as.formula(paste("~", y_A_col)), calibrated_design)[1]
-    )  
+    svymean_result <- svymean(as.formula(paste("~", y_A_col)), calibrated_design)
+    T_RegDI <- as.numeric(svymean_result[1])
+    V_RegDI <- as.numeric(attr(svymean_result, "var")[1])
     
   } else if (apply_correction == 2) {
     validation_indices <- which(data$muestra_A == 1 & data$muestra_B == 1)
@@ -259,23 +260,16 @@ RegDI <- function(data, y_A_col, y_B_col,
       aggregate.stage = 1
     )
     
-    T_RegDI <- as.numeric(
-      svymean(~y_corrected, calibrated_design_corrected)[1]
-    )
-    V_RegDI <- as.numeric(
-      svyvar(~y_corrected, calibrated_design_corrected)[1]
-    )
+    svymean_result <- svymean(~y_corrected, calibrated_design_corrected)
+    T_RegDI <- as.numeric(svymean_result[1])
+    V_RegDI <- as.numeric(attr(svymean_result, "var")[1])
     
   } else {
-    T_RegDI <- as.numeric(
-      svymean(as.formula(paste("~", y_A_col)), calibrated_design)[1]
-    )  
-    V_RegDI <- as.numeric(
-      svyvar(as.formula(paste("~", y_A_col)), calibrated_design)[1]
-    )  
+    svymean_result <- svymean(as.formula(paste("~", y_A_col)), calibrated_design)
+    T_RegDI <- as.numeric(svymean_result[1])
+    V_RegDI <- as.numeric(attr(svymean_result, "var")[1])
   }
   
   return(list(mean_RegDI = T_RegDI, var_RegDI = V_RegDI))
 }
-
 

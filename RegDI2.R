@@ -15,9 +15,10 @@ RegDI2 <- function(data = NULL,
                    weights_B = NULL,         # Opcional para RegDI2, no se usa directamente
                    outcome_model = NULL,
                    model_type = "normal",    # Tipo de modelo ("normal", "logistic")
-                   correction = 0            # 0: Sin corrección, 1: Corrección A, 2: Corrección B, 3: Doble Robusto
+                   correction = 0,           # 0: Sin corrección, 1: Corrección A, 2: Corrección B, 3: Doble Robusto
+                   eval_model_performance = FALSE    # Nuevo parámetro para evaluar el rendimiento del modelo
                    ) {
-    
+        
     # 1. Validar que al menos se proporcione 'data' o ambas 'data_A' y 'data_B'
     if (is.null(data) && (is.null(data_A) || is.null(data_B))) {
         stop("Debe proporcionar 'data' o ambas 'data_A' y 'data_B'.")
@@ -145,7 +146,7 @@ RegDI2 <- function(data = NULL,
     )
     
     # 12. Función interna para calcular el estimador Doble Robusto
-    calculate_DR_RegDI <- function(data, calibrated_design, y_A_col, aux_vars, N_total) {
+    calculate_DR_RegDI <- function(data, calibrated_design, y_A_col, aux_vars, N_total, outcome_model, eval_model_performance) {
         # 1. Estimar el modelo de resultado usando las muestras A
         if (is.null(outcome_model)) {
             stop("Debe especificar el modelo de resultado a través del parámetro 'outcome_model'.")
@@ -167,11 +168,24 @@ RegDI2 <- function(data = NULL,
         # Estimador DR-RegDI
         T_DR_RegDI <- (sum_weights_residuals + sum_Y_pred) / N_total
         # Estimación de la varianza
-        var_weights_residuals <- var(residuals_weighted) / length(residuals_weighted)
-        var_Y_pred <- var(data$Y_pred) / N_total
+        var_weights_residuals <- var(residuals_weighted, na.rm = TRUE) / length(residuals_weighted)
+        var_Y_pred <- var(data$Y_pred, na.rm = TRUE) / N_total
         V_DR_RegDI <- var_weights_residuals + var_Y_pred
         
-        return(list(mean_DR_RegDI = T_DR_RegDI, var_DR_RegDI = V_DR_RegDI))
+        # Evaluar el rendimiento del modelo si se solicita
+        if (eval_model_performance) {
+            residuals <- data[[y_A_col]][data[[ind_var_A]] == 1] - data$Y_pred[data[[ind_var_A]] == 1]
+            RMSE <- sqrt(mean(residuals^2, na.rm = TRUE))
+            
+            # Calcular R^2
+            SST <- sum((data[[y_A_col]][data[[ind_var_A]] == 1] - mean(data[[y_A_col]][data[[ind_var_A]] == 1], na.rm = TRUE))^2, na.rm = TRUE)
+            SSR <- sum(residuals^2, na.rm = TRUE)
+            R2 <- 1 - (SSR / SST)
+            
+            return(list(mean_DR_RegDI = T_DR_RegDI, var_DR_RegDI = V_DR_RegDI, RMSE = RMSE, R2 = R2))
+        } else {
+            return(list(mean_DR_RegDI = T_DR_RegDI, var_DR_RegDI = V_DR_RegDI))
+        }
     }
     
     # 13. Aplicar la corrección según el valor de 'correction'
@@ -221,7 +235,7 @@ RegDI2 <- function(data = NULL,
         } else {
             calibration_formula_corrected <- ~0 + uno + delta_i + delta_yi_corrected
         }
-
+    
         # Crear el diseño de encuesta corregido
         design_corrected <- svydesign(
             ids = ~1,
@@ -244,9 +258,14 @@ RegDI2 <- function(data = NULL,
         
     } else if (correction == 3) {
         # Estimador Doble Robusto (DR-RegDI)
-        DR_results <- calculate_DR_RegDI(data, calibrated_design, y_A_col, aux_vars, N_total)
+        DR_results <- calculate_DR_RegDI(data, calibrated_design, y_A_col, aux_vars, N_total, outcome_model, eval_model_performance)
         T_RegDI <- DR_results$mean_DR_RegDI
         V_RegDI <- DR_results$var_DR_RegDI
+        
+        if (eval_model_performance) {
+            RMSE <- DR_results$RMSE
+            R2 <- DR_results$R2
+        }
         
     } else {
         # Sin corrección
@@ -255,5 +274,10 @@ RegDI2 <- function(data = NULL,
         V_RegDI <- as.numeric(attr(svymean_result, "var")[1])
     }
 
-    return(list(mean_RegDI = T_RegDI, var_RegDI = V_RegDI))
+    # Devolver resultados incluyendo métricas de rendimiento si corresponde
+    if (correction == 3 && eval_model_performance) {
+        return(list(mean_RegDI = T_RegDI, var_RegDI = V_RegDI, RMSE = RMSE, R2 = R2))
+    } else {
+        return(list(mean_RegDI = T_RegDI, var_RegDI = V_RegDI))
+    }
 }

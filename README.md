@@ -18,7 +18,7 @@ $$
 
 Aquí, $x_{i}$ representa las variables auxiliares conocidas en la población basados en la muestra no probablística, como el tamaño de la muestra de big data $N_b$ y el total de la variable de interés en la muestra de Big Data. 
 
-- **Referencia:** Kim, J.-K., & Tam, S.-M. (2021). Data integration by combining big data and survey sample data for finite population inference. *International Statistical Review, 89*(2), 382–401. [Wiley Online Library](https://onlinelibrary.wiley.com/doi/10.1111/insr.12345)
+- **Referencia:** Kim, J.-K., & Tam, S.-M. (2021). Data integration by combining big data and survey sample data for finite population inference. *International Statistical Review, 89*(2), 382–401. [Wiley Online Library](https://onlinelibrary.wiley.com/doi/10.1111/insr.12434)
 
 ### Estimador PC
 El estimador **PC** o de pseudo-calibración utiliza una combinación de ponderaciones ajustadas y datos auxiliares para estimar parámetros de la población a partir de muestras no probabilísticas. Este método emplea un modelo de propensión implícito y al igual que RegDI, ajustanda los pesos, esta vez basados en la muestra no probabilística, para que cumplan con restricciones de calibración, las cuales se basan en totales conocidos de una encuesta de referencia. Este enfoque permite corregir el sesgo de selección y adaptar el estimador para poblaciones donde la muestra de big data puede tener una sub-cobertura o no seguir un esquema de probabilidad.
@@ -37,7 +37,7 @@ $$
 
 Aquí, $\mathbf{X}^{*}$ representa los totales conocidos o estimados de la población, obtenidos de una encuesta de referencia o un censo, para variables auxiliares relevantes en la estimación.
 
-- **Referencia:** Golini, N., & Righi, P. (2024). Integrating probability and big non-probability samples data to produce Official Statistics. *Statistical Methods & Applications, 33*(2), 555–580. [Springer](https://link.springer.com/article/10.1007/s10260-024-00456-8)
+- **Referencia:** Golini, N., & Righi, P. (2024). Integrating probability and big non-probability samples data to produce Official Statistics. *Statistical Methods & Applications, 33*(2), 555–580. [Springer](https://link.springer.com/article/10.1007/s10260-023-00740-y)
 - **Representación matemática:** [Espacio para incluir la forma matemática]
 
 ## Simulaciones

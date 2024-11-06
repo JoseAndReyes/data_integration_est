@@ -38,7 +38,6 @@ $$
 Aquí, $\mathbf{X}^{*}$ representa los totales conocidos o estimados de la población, obtenidos de una encuesta de referencia o un censo, para variables auxiliares relevantes en la estimación.
 
 - **Referencia:** Golini, N., & Righi, P. (2024). Integrating probability and big non-probability samples data to produce Official Statistics. *Statistical Methods & Applications, 33*(2), 555–580. [Springer](https://link.springer.com/article/10.1007/s10260-023-00740-y)
-- **Representación matemática:** [Espacio para incluir la forma matemática]
 
 ## Simulaciones
 El archivo `Simulaciones_Clean.ipynb` incluye todas las simulaciones realizadas en el marco de este proyecto de tesis. Estas simulaciones abarcan tanto aquellas realizadas bajo la metodología de [Referencia PC] como algunas simulaciones propias diseñadas para explorar distintos escenarios y supuestos. Las simulaciones incluidas son:
